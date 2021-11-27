@@ -12,7 +12,7 @@ const menuItems = [
   {
     title: "Delete Help Requests",
     icon: {
-      name: "format-list-bulleted",
+      name: "delete",
       backgroundColor: colors.primary,
     },
     targetScreen: routes.DELETELOG,
@@ -20,10 +20,18 @@ const menuItems = [
   {
     title: "My Assitance Logs ",
     icon: {
-      name: "email",
+      name: "run-fast",
       backgroundColor: colors.secondary,
     },
     targetScreen: routes.ASSISTANCELOG,
+  },
+  {
+    title: "My Request Logs ",
+    icon: {
+      name: "handshake",
+      backgroundColor: colors.secondary,
+    },
+    targetScreen: routes.RequestLog,
   },
 ];
 

@@ -22,6 +22,8 @@ import InputForm from "../components/TextInput";
 import InputFormLarge from "../components/TextInputLarge";
 import { nameValidator } from "../helpers/nameValidator";
 import { emailValidator } from "../helpers/emailValidator";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 
 const Stack = createStackNavigator();
 

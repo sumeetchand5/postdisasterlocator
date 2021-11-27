@@ -1,5 +1,11 @@
 import * as React from "react";
-import { StyleSheet, View, TextInput, Text, ScrollView } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Text,
+  ScrollView,
+  ToastAndroid,
+} from "react-native";
 import Card from "../components/Card";
 import Button from "../components/Button";
 
@@ -11,14 +17,52 @@ import { Picker } from "@react-native-picker/picker";
 import InputFormLarge from "../components/TextInputLarge";
 import { nameValidator } from "../helpers/nameValidator";
 import LoadingSimple from "../components/LoadingSimple";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { create } from "apisauce";
 
 export default detailsPage = ({ route, navigation }) => {
+  React.useEffect(() => {
+    (async () => {
+      setLoading(true);
+      const api = create({
+        baseURL: "https://limitless-ravine-58220.herokuapp.com/users",
+      });
+      const response = await api.get("/GetAssistanceReceived");
+
+      if (response.status === null || response.status != 200) {
+        ToastAndroid.show(
+          "Something went wrong. Please try again",
+          ToastAndroid.SHORT
+        );
+
+        setLoading(false);
+        return;
+      }
+
+      console.log(HelpRequesterUserId);
+
+      setList(
+        response.data
+          .map((value) => {
+            return {
+              HelpType: value.HelpType,
+              userId: value.HelpRequesterUserId,
+            };
+          })
+          .filter((value) => value.userId == HelpRequesterUserId)
+      );
+
+      setLoading(false);
+    })();
+  }, []);
+
   const {
     currentCoordinate,
     destinationCoordinate,
     helpType,
     helpDetails,
     contactDetails,
+    HelpRequesterUserId,
   } = route.params;
 
   let keyExtractor = (item, index) => index.toString();
@@ -37,19 +81,6 @@ export default detailsPage = ({ route, navigation }) => {
     </ListItem>
   );
 
-  const listtwo = [
-    {
-      title: "Medical Assistance",
-      icon: "medical-bag",
-      requestCount: 2,
-    },
-    {
-      title: "Food Ration Assitance",
-      icon: "food",
-      requestCount: 5,
-    },
-  ];
-
   const [isModalVisible, setModalVisible] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [AssistanceType, setAssistanceType] = React.useState("Medical Aid");
@@ -57,18 +88,62 @@ export default detailsPage = ({ route, navigation }) => {
     value: "",
     error: "",
   });
+  const [list, setList] = React.useState([]);
 
   const toggleModal = () => {
     setModalVisible(!isModalVisible);
   };
 
-  const submitHelp = () => {
+  const getData = async () => {
+    try {
+      const value = await AsyncStorage.getItem("@userId");
+      return value;
+    } catch (e) {
+      // error reading value
+    }
+  };
+
+  const submitHelp = async () => {
     const descriptionError = nameValidator(description.value);
     if (descriptionError) {
       setDescription({ ...description, error: descriptionError });
       return;
     }
     setLoading(true);
+    id = await getData();
+
+    const api = create({
+      baseURL: "https://limitless-ravine-58220.herokuapp.com/users",
+    });
+
+    const response = await api.post(
+      "/SubmitAssistanceReceived",
+      JSON.stringify({
+        userId: id,
+        HelpRequesterUserId,
+        HelpType: AssistanceType,
+        HelpDescription: description,
+      })
+    );
+
+    console.log(response);
+
+    if (response.status === null || response.status != 200) {
+      ToastAndroid.show(
+        "Something went wrong. Please try again",
+        ToastAndroid.SHORT
+      );
+      setLoading(false);
+      return;
+    }
+
+    //add newly updated data into state to reflect changes
+    ToastAndroid.show("Request submitted successfully", ToastAndroid.SHORT);
+
+    const listtemp = list;
+    listtemp.push({ HelpType: AssistanceType, userId: 1 });
+    setList(listtemp);
+
     setLoading(false);
     setModalVisible(!isModalVisible);
   };
@@ -89,22 +164,32 @@ export default detailsPage = ({ route, navigation }) => {
         <View>
           <Text style={styles.categoryTitle}>Current Received Assistance</Text>
         </View>
-        <View style={styles.categoryCard}>
-          {listtwo.map((item, i) => (
-            <ListItem key={i} bottomDivider>
-              <MaterialCommunityIcons
-                name={item.icon}
-                color={colors.primary}
-                size={30}
-              />
+        {loading ? (
+          <LoadingSimple />
+        ) : (
+          <View style={styles.categoryCard}>
+            {list.map((item, i) => (
+              <ListItem key={i} bottomDivider>
+                <MaterialCommunityIcons
+                  name={
+                    item.HelpType === "Medical Aid"
+                      ? "medical-bag"
+                      : item.HelpType === "Food Ration"
+                      ? "food"
+                      : "handshake"
+                  }
+                  color={colors.primary}
+                  size={30}
+                />
 
-              <ListItem.Content>
-                <ListItem.Title>{item.title}</ListItem.Title>
-              </ListItem.Content>
-              <ListItem.Chevron />
-            </ListItem>
-          ))}
-        </View>
+                <ListItem.Content>
+                  <ListItem.Title>{item.HelpType}</ListItem.Title>
+                </ListItem.Content>
+                <ListItem.Chevron />
+              </ListItem>
+            ))}
+          </View>
+        )}
 
         <View style={styles.buttonContainerMain}>
           <Button

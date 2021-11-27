@@ -141,9 +141,16 @@ const Home = ({ navigation }) => {
 
   let renderItem = ({ item }) => (
     <ListItem bottomDivider>
-      <Avatar
-        title={item.subject[0]}
-        source={item.avatar_url && { uri: item.avatar_url }}
+      <MaterialCommunityIcons
+        name={
+          item.subject === "Medical Aid"
+            ? "medical-bag"
+            : item.subject === "Food Ration"
+            ? "food"
+            : "handshake"
+        }
+        color={colors.primary}
+        size={30}
       />
       <ListItem.Content>
         <ListItem.Title>{item.subject}</ListItem.Title>
@@ -159,7 +166,7 @@ const Home = ({ navigation }) => {
       Description: "11/Nov/21",
     },
     {
-      subject: "Food Ration Assistance",
+      subject: "Food Ration",
       Description: "10/Nov/21",
     },
     {
@@ -182,75 +189,75 @@ const Home = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <ScrollView>
-        <View style={styles.filterButton}>
-          <TouchableOpacity style={styles.button}>
-            <Text style={styles.text}>Medical</Text>
-          </TouchableOpacity>
+      <SafeAreaView>
+        <ScrollView>
+          <View style={styles.filterButton}>
+            <TouchableOpacity style={styles.button}>
+              <Text style={styles.text}>Medical</Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity style={styles.button}>
-            <Text style={styles.text}>Ration</Text>
-          </TouchableOpacity>
+            <TouchableOpacity style={styles.button}>
+              <Text style={styles.text}>Ration</Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity style={styles.button}>
-            <Text style={styles.text}>Emergency</Text>
-          </TouchableOpacity>
-        </View>
-        <View>
-          <Text style={styles.categoryTitle}>Current Help Requests</Text>
-        </View>
-        <View style={styles.categoryCard}>
-          {markers.map((item, i) => (
-            <ListItem
-              key={i}
-              onPress={() => {
-                navigation.push("DetailsPage", {
-                  destinationCoordinate: {
-                    latitude: parseFloat(item.latitude),
-                    longitude: parseFloat(item.longitude),
-                  },
-                  helpType: item.subject,
-                  helpDetails: item.Description,
-                  contactDetails: item.phone,
+            <TouchableOpacity style={styles.button}>
+              <Text style={styles.text}>Emergency</Text>
+            </TouchableOpacity>
+          </View>
+          <View>
+            <Text style={styles.categoryTitle}>Current Help Requests</Text>
+          </View>
+          <View style={styles.categoryCard}>
+            {markers.map((item, i) => (
+              <ListItem
+                key={i}
+                onPress={() => {
+                  navigation.push("DetailsPage", {
+                    destinationCoordinate: {
+                      latitude: parseFloat(item.latitude),
+                      longitude: parseFloat(item.longitude),
+                    },
+                    helpType: item.subject,
+                    helpDetails: item.Description,
+                    contactDetails: item.phone,
 
-                  currentCoordinate: {
-                    latitude: location.coords.latitude,
-                    longitude: location.coords.longitude,
-                  },
-                });
-              }}
-            >
-              <MaterialCommunityIcons
-                name={
-                  item.subject === "Medical Aid"
-                    ? "medical-bag"
-                    : item.subject === "Food Ration Aid"
-                    ? "food"
-                    : "handshake"
-                }
-                color={colors.primary}
-                size={30}
-              />
+                    currentCoordinate: {
+                      latitude: location.coords.latitude,
+                      longitude: location.coords.longitude,
+                    },
+                  });
+                }}
+              >
+                <MaterialCommunityIcons
+                  name={
+                    item.subject === "Medical Aid"
+                      ? "medical-bag"
+                      : item.subject === "Food Ration"
+                      ? "food"
+                      : "handshake"
+                  }
+                  color={colors.primary}
+                  size={30}
+                />
 
-              <ListItem.Content>
-                <ListItem.Title>{item.subject}</ListItem.Title>
-              </ListItem.Content>
-              <ListItem.Chevron />
-              <Badge
-                status="error"
-                value={item.requestCount}
-                textStyle={{ color: "white" }}
-                containerStyle={{ marginTop: -20 }}
-              />
-            </ListItem>
-          ))}
-        </View>
+                <ListItem.Content>
+                  <ListItem.Title>{item.subject}</ListItem.Title>
+                </ListItem.Content>
+                <ListItem.Chevron />
+                <Badge
+                  status="error"
+                  value={item.requestCount}
+                  textStyle={{ color: "white" }}
+                  containerStyle={{ marginTop: -20 }}
+                />
+              </ListItem>
+            ))}
+          </View>
 
-        <View>
-          <Text style={styles.categoryTitle}>My Assistance History</Text>
-        </View>
+          <View>
+            <Text style={styles.categoryTitle}>My Assistance History</Text>
+          </View>
 
-        <SafeAreaView>
           <View style={styles.categoryCard}>
             <FlatList
               keyExtractor={keyExtractor}
@@ -258,8 +265,8 @@ const Home = ({ navigation }) => {
               renderItem={renderItem}
             />
           </View>
-        </SafeAreaView>
-      </ScrollView>
+        </ScrollView>
+      </SafeAreaView>
     </View>
   );
 };

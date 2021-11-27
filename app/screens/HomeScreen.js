@@ -193,6 +193,7 @@ const Home = ({ navigation }) => {
                 helpType: marker.subject,
                 helpDetails: marker.Description,
                 contactDetails: marker.phone,
+                HelpRequesterUserId: marker.userID ,
 
                 currentCoordinate: cod,
               })
